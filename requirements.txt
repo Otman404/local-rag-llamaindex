@@ -1,0 +1,10 @@
+arxiv==2.1.0
+fastapi==0.109.0
+langchain==0.1.1
+llama_index==0.9.32
+ollama==0.1.2
+pydantic==2.5.3
+PyYAML==6.0.1
+qdrant_client==1.7.0
+tqdm==4.66.1
+sentence-transformers

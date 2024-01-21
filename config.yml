@@ -1,0 +1,6 @@
+data_path: "data/"
+llm_url: "http://localhost:11434"
+embedding_model: "sentence-transformers/all-mpnet-base-v2"
+qdrant_url: "http://localhost:6333"
+collection_name: "researchpapers"
+chunk_size: 1024
