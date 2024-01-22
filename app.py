@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 import yaml
 from llama_index.llms import Ollama
 
-from research_papers_rag.rag import RAG
+from rag.rag import RAG
 
 
 config_file = "config.yml"
@@ -34,7 +34,7 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    return {"message": "Research RAG"}
 
 
 @app.post("/api/search", response_model=Response, status_code=200)

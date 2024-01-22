@@ -25,7 +25,7 @@ class Data:
     def _create_data_folder(self, download_path):
         data_path = download_path
         if not os.path.exists(data_path):
-            os.makedirs(self.data_folder)
+            os.makedirs(self.config["data_path"])
             print("Output folder created")
         else:
             print("Output folder already exists.")
@@ -66,29 +66,34 @@ class Data:
         index = VectorStoreIndex.from_documents(
             documents, storage_context=storage_context, service_context=service_context
         )
-        print(f"Data indexed successfully to Qdrant. Collection: {self.config['collection_name']}")
+        print(
+            f"Data indexed successfully to Qdrant. Collection: {self.config['collection_name']}"
+        )
         return index
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--query",
+        "-q", "--query",
         type=str,
         default=False,
         help="Download papers from arxiv with this query.",
     )
-    parser.add_argument("--output", type=str, default=False, help="Download path.")
+    # parser.add_argument(
+    #     "-o", "--output", type=str, default=False, help="Download path."
+    # )
 
     parser.add_argument(
-        "--max", type=int, default=False, help="Max results to download."
+        "-m", "--max", type=int, default=False, help="Max results to download."
     )
 
     parser.add_argument(
+        "-i",
         "--ingest",
         action=argparse.BooleanOptionalAction,
         default=False,
-        help="Ingest data to qdrant vector Database.",
+        help="Ingest data to Qdrant vector Database.",
     )
 
     args = parser.parse_args()
@@ -98,7 +103,9 @@ if __name__ == "__main__":
     data = Data(config)
     if args.query:
         data.download_papers(
-            search_query=args.query, download_path=args.output, max_results=args.max
+            search_query=args.query,
+            download_path=config["data_path"],
+            max_results=args.max,
         )
     if args.ingest:
         print("Loading Embedder...")
