@@ -36,7 +36,7 @@ class RAG:
         # )
 
         service_context = ServiceContext.from_defaults(
-            llm=self.llm, embed_model=self.load_embedder(), chunk_size=512
+            llm=self.llm, embed_model=self.load_embedder(), chunk_size=self.config["chunk_size"]
         )
 
         index = VectorStoreIndex.from_vector_store(
