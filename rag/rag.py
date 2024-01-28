@@ -32,7 +32,7 @@ class RAG:
             client=client, collection_name=self.config['collection_name']
         )
         # service_context = ServiceContext.from_defaults(
-        #     llm=llm, embed_model="local:BAAI/bge-small-en-v1.5"
+        #     llm=self.llm, embed_model="local:BAAI/bge-small-en-v1.5"
         # )
 
         service_context = ServiceContext.from_defaults(

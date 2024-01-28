@@ -112,5 +112,5 @@ if __name__ == "__main__":
         embed_model = LangchainEmbedding(
             HuggingFaceEmbeddings(model_name=config["embedding_model"])
         )
-        llm = Ollama(model="zeph", base_url=config["llm_url"])
+        llm = Ollama(model=config["llm_name"], base_url=config["llm_url"])
         data.ingest(embedder=embed_model, llm=llm)
