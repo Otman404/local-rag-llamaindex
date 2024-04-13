@@ -1,15 +1,19 @@
 ### Loading the embedder
 
-from llama_index import VectorStoreIndex, SimpleDirectoryReader
-from llama_index import ServiceContext
-from llama_index import ServiceContext
-from llama_index import VectorStoreIndex
-from llama_index import StorageContext
+# from llama_index import VectorStoreIndex, SimpleDirectoryReader
+# from llama_index import ServiceContext
+from llama_index.core import ServiceContext
+from llama_index.core import ServiceContext
+# from llama_index import VectorStoreIndex
+from llama_index.core import StorageContext
 from llama_index.vector_stores.qdrant import QdrantVectorStore
-from llama_index.embeddings import LangchainEmbedding
+# llama_index.vector_stores.qdrant  import QdrantVectorStore
+from llama_index.embeddings.langchain import LangchainEmbedding
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 import qdrant_client
 import yaml
+
+from llama_index.core import VectorStoreIndex
 
 class RAG:
     def __init__(self, config_file, llm):
