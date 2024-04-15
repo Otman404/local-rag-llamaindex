@@ -8,3 +8,5 @@ PyYAML==6.0.1
 qdrant_client==1.7.0
 tqdm==4.66.1
 sentence-transformers
+
+chardet
