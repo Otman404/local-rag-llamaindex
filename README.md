@@ -24,6 +24,10 @@ For more details, please checkout the [blog post](https://otmaneboughaba.com/pos
 docker run -p 6333:6333 -v ~/qdrant_storage:/qdrant/storage:z qdrant/qdrant
 ```
 
+## or by chroma
+
+https://docs.trychroma.com/deployment
+
 #### Downloading & Indexing data
 
 ```bash
