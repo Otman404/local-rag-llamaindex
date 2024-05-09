@@ -28,6 +28,12 @@ docker run -p 6333:6333 -v ~/qdrant_storage:/qdrant/storage:z qdrant/qdrant
 
 https://docs.trychroma.com/deployment
 
+
+## or by weaviate
+
+https://github.com/yangboz/llm-ollama-llamaindex-bootstrap-ui
+
+
 #### Downloading & Indexing data
 
 ```bash
