@@ -73,3 +73,9 @@ uvicorn app:app --reload
 
 #### Response
 ![Response](images/response.png)
+
+
+## TODO 
+more on retriver/reranker to improve IR  accuracy,  
+
+
