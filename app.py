@@ -3,9 +3,14 @@ from typing import Optional, List
 import ollama
 from pydantic import BaseModel, Field
 import yaml
-from llama_index.llms import Ollama
+# from llama_index.llms import Ollama
+from llama_index.llms.ollama import Ollama
+import ollama
 from rag.rag import RAG
 
+from llama_index.core import Document
+
+from llama_index.core import VectorStoreIndex
 
 config_file = "config.yml"
 
