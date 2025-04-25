@@ -1,3 +1,5 @@
 __pycache__
 data
 qdrant_storage
+models/
+ollama/

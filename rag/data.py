@@ -1,21 +1,21 @@
-from llama_index import (
-    ServiceContext,
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.vector_stores.qdrant import QdrantVectorStore
+from llama_index.llms.ollama import Ollama
+from llama_index.core import (
     SimpleDirectoryReader,
     StorageContext,
     VectorStoreIndex,
+    Settings,
 )
-from llama_index.vector_stores.qdrant import QdrantVectorStore
 from tqdm import tqdm
-import arxiv
-import os
-import argparse
-import yaml
 import qdrant_client
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from llama_index.embeddings import LangchainEmbedding
+import argparse
+import arxiv
+import yaml
+import os
+import structlog
 
-from llama_index import ServiceContext
-from llama_index.llms import Ollama
+logger = structlog.get_logger()
 
 
 class Data:
@@ -26,9 +26,9 @@ class Data:
         data_path = download_path
         if not os.path.exists(data_path):
             os.makedirs(self.config["data_path"])
-            print("Output folder created")
+            logger.info("Output folder created", output_folder=data_path)
         else:
-            print("Output folder already exists.")
+            logger.warning(f"Output folder already exists at {data_path}")
 
     def download_papers(self, search_query, download_path, max_results):
         self._create_data_folder(download_path)
@@ -45,10 +45,10 @@ class Data:
             if os.path.exists(download_path):
                 paper_title = (paper.title).replace(" ", "_")
                 paper.download_pdf(dirpath=download_path, filename=f"{paper_title}.pdf")
-                print(f"{paper.title} Downloaded.")
+                logger.info("PDF Downloaded", pdf_name=paper.title)
 
     def ingest(self, embedder, llm):
-        print("Indexing data...")
+        logger.info("Indexing data...")
         documents = SimpleDirectoryReader(self.config["data_path"]).load_data()
 
         client = qdrant_client.QdrantClient(url=self.config["qdrant_url"])
@@ -56,18 +56,16 @@ class Data:
             client=client, collection_name=self.config["collection_name"]
         )
         storage_context = StorageContext.from_defaults(vector_store=qdrant_vector_store)
-        # service_context = ServiceContext.from_defaults(
-        #     llm=llm, embed_model=embedder, chunk_size=self.config["chunk_size"]
-        # )
-        service_context = ServiceContext.from_defaults(
-            llm=None, embed_model=embedder, chunk_size=self.config["chunk_size"]
-        )
 
+        Settings.llm = None
+        Settings.embed_model = embedder
+        Settings.chunk_size = self.config["chunk_size"]
         index = VectorStoreIndex.from_documents(
-            documents, storage_context=storage_context, service_context=service_context
+            documents, storage_context=storage_context, Settings=Settings
         )
-        print(
-            f"Data indexed successfully to Qdrant. Collection: {self.config['collection_name']}"
+        logger.info(
+            "Data indexed successfully to Qdrant",
+            collection=self.config["collection_name"],
         )
         return index
 
@@ -75,7 +73,8 @@ class Data:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-q", "--query",
+        "-q",
+        "--query",
         type=str,
         default=False,
         help="Download papers from arxiv with this query.",
@@ -108,9 +107,7 @@ if __name__ == "__main__":
             max_results=args.max,
         )
     if args.ingest:
-        print("Loading Embedder...")
-        embed_model = LangchainEmbedding(
-            HuggingFaceEmbeddings(model_name=config["embedding_model"])
-        )
+        logger.info("Loading Embedder...", embed_model=config["embedding_model"])
+        embed_model = HuggingFaceEmbedding(model_name=config["embedding_model"])
         llm = Ollama(model=config["llm_name"], base_url=config["llm_url"])
         data.ingest(embedder=embed_model, llm=llm)
