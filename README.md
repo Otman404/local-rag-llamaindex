@@ -24,10 +24,24 @@ For more details, please checkout the [blog post](https://otmaneboughaba.com/pos
 docker run -p 6333:6333 -v ~/qdrant_storage:/qdrant/storage:z qdrant/qdrant
 ```
 
+#### Setting up the environment
+
+```bash
+# clone the repository
+git clone https://github.com/Otman404/local-rag-llamaindex
+cd local-rag-llamaindex
+
+# create virtual env with uv
+uv venv
+
+# activate the virtual env
+source .venv/bin/activate
+```
+
 #### Downloading & Indexing data
 
 ```bash
-python rag/data.py --query "LLM" --max 10 --ingest
+uv run rag/data.py --query "LLM" --max 10 --ingest
 ```
 
 #### Starting Ollama LLM server
@@ -51,7 +65,7 @@ By default, Ollama runs on ```http://localhost:11434```
 #### Starting the api server
 
 ```bash
-uvicorn app:app --reload
+uv run fastapi dev
 ```
 
 
