@@ -7,7 +7,6 @@ from llama_index.core import (
     VectorStoreIndex,
     Settings,
 )
-from tqdm import tqdm
 import qdrant_client
 import argparse
 import arxiv
@@ -33,7 +32,7 @@ class Data:
     def download_papers(self, search_query, download_path, max_results):
         self._create_data_folder(download_path)
         client = arxiv.Client()
-
+        logger.info("Searching papers from arxiv...", query=search_query)
         search = arxiv.Search(
             query=search_query,
             max_results=max_results,
@@ -41,11 +40,13 @@ class Data:
         )
 
         results = list(client.results(search))
-        for paper in tqdm(results):
+        for i, paper in enumerate(results):
             if os.path.exists(download_path):
                 paper_title = (paper.title).replace(" ", "_")
                 paper.download_pdf(dirpath=download_path, filename=f"{paper_title}.pdf")
-                logger.info("PDF Downloaded", pdf_name=paper.title)
+                logger.info(
+                    f"{i+1}/{len(results)} PDF Downloaded", pdf_name=paper.title
+                )
 
     def ingest(self, embedder, llm):
         logger.info("Indexing data...")

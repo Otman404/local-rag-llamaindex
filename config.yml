@@ -1,4 +1,4 @@
-data_path: "data/"
+data_path: "papers/"
 llm_url: "http://localhost:11434"
 llm_name: "research_assistant"
 embedding_model: "sentence-transformers/all-mpnet-base-v2"
