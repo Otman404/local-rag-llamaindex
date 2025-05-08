@@ -2,5 +2,8 @@ __pycache__
 papers/
 qdrant_storage
 models/
-ollama/
 .venv
+ollama/*
+!ollama/Modelfile
+!ollama/run_ollama.sh
+build/

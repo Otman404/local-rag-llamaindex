@@ -18,6 +18,71 @@ For more details, please checkout the [blog post](https://otmaneboughaba.com/pos
 
 ## Running the project
 
+### Quick Start (Docker Compose)
+
+This project now uses Docker and Docker Compose for easier setup and reproducibility.
+
+#### 1. Clone the Repo
+
+```bash
+git clone https://github.com/Otman404/local-rag-llamaindex
+cd local-rag-llamaindex
+```
+
+#### 2. Build the Docker images
+
+```bash
+docker compose build
+```
+
+This will:
+
+* Build a rag-base-image containing shared dependencies (LlamaIndex, llama-index, etc.)
+
+* Build the api service (FastAPI backend) using Dockerfile in api/
+
+* Build the data_ingestion service used for downloading and indexing research papers using Dockerfile in data/
+
+#### 3. Run All Services
+
+```bash
+docker compose up ollama qdrant api
+```
+
+This starts:
+
+* **API** server (FastAPI on port `8000`)
+* **Qdrant** vector DB (port `6333`)
+* **Ollama** LLM server (port `11434`)
+
+#### 4. Download & Ingest Papers
+
+To ingest new research papers into Qdrant:
+
+```bash
+docker compose run data_ingestion --query "LLM" --max 5 --ingest
+```
+
+`--query`: search keyword for downloading research papers from Arxiv.
+
+`--max`: Limits the results.
+
+`--ingest`: Ingests the downloaded papers into the Qdrant database.
+
+This uses `arxiv` to fetch papers, chunk them with LlamaIndex, and store them into Qdrant.
+
+> ✅ You should now be able to query the API at `http://localhost:8000`
+
+#### Stopping & Clean Up
+
+To stop all running containers and networks started by Docker Compose:
+
+```bash
+docker compose down
+```
+
+### Running the project manually with uv
+
 #### Starting a Qdrant docker instance
 
 ```bash
@@ -26,22 +91,21 @@ docker run -p 6333:6333 -v ~/qdrant_storage:/qdrant/storage:z qdrant/qdrant
 
 #### Setting up the environment
 
-```bash
-# clone the repository
-git clone https://github.com/Otman404/local-rag-llamaindex
-cd local-rag-llamaindex
+Inside the project folder run
 
+```bash
 # create virtual env with uv
 uv venv
-
 # activate the virtual env
 source .venv/bin/activate
+# install project dependencies
+uv pip install ".[dev]"
 ```
 
 #### Downloading & Indexing data
 
 ```bash
-uv run rag/data.py --query "LLM" --max 10 --ingest
+uv run data/data.py --query "LLM" --max 5 --ingest
 ```
 
 #### Starting Ollama LLM server
@@ -65,15 +129,15 @@ By default, Ollama runs on ```http://localhost:11434```
 #### Starting the api server
 
 ```bash
-uv run fastapi dev
+uv run fastapi api/main.py dev
 ```
-
 
 ## Example
 
-#### Request
+### Request
 
 ![Post Request](images/post_request.png)
 
-#### Response
+### Response
+
 ![Response](images/response.png)

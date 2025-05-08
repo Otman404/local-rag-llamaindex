@@ -1,0 +1,101 @@
+services:
+  # Base image for the application
+  # This image is used to build the other services
+  # and contains the common dependencies
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    image: rag-base-image
+
+  # FastAPI application
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "8000:80"
+    depends_on:
+      - ollama
+      - qdrant
+      - base
+    environment:
+      - LLM_URL=http://ollama:11434
+      - LLM_NAME=research_assistant
+      - EMBEDDING_MODEL=sentence-transformers/all-mpnet-base-v2
+      - QDRANT_URL=http://qdrant:6333
+      - COLLECTION_NAME=researchpapers
+      - CHUNK_SIZE=1024
+    restart: always
+    networks:
+      - rag-network
+    volumes:
+      - ./api:/api
+
+  # Data ingestion CLI tool
+  data_ingestion:
+    build:
+      context: .
+      dockerfile: data/Dockerfile
+    profiles: ["data-ingest"]
+    depends_on:
+      - ollama
+      - qdrant
+    entrypoint: ["python", "data.py"]
+    environment:
+      - DATA_PATH=papers/
+      - LLM_URL=http://ollama:11434
+      - LLM_NAME=research_assistant
+      - EMBEDDING_MODEL=sentence-transformers/all-mpnet-base-v2
+      - QDRANT_URL=http://qdrant:6333
+      - COLLECTION_NAME=researchpapers
+      - CHUNK_SIZE=1024
+    networks:
+      - rag-network
+    volumes:
+      - ./papers:/app/papers
+  # Qdrant vector database
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - ~/qdrant_storage:/qdrant/storage:z
+    networks:
+      - rag-network
+
+  # Ollama for LLM serving
+  ollama:
+    image: ollama/ollama:latest
+    pull_policy: always
+    container_name: ollama
+    volumes:
+      - ./ollama:/model_files
+      - ./ollama:/root/.ollama
+    tty: true
+    entrypoint: ["/bin/sh", "./model_files/run_ollama.sh"]
+    environment:
+      - LLM_NAME=research_assistant
+    restart: always
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - "11434:11434"
+    networks:
+      - rag-network
+
+networks:
+  rag-network:
+    driver: bridge
+
+volumes:
+  qdrant_storage:
+  ollama:

@@ -893,6 +893,7 @@ dependencies = [
     { name = "llama-index-embeddings-huggingface" },
     { name = "llama-index-llms-ollama" },
     { name = "llama-index-vector-stores-qdrant" },
+    { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "qdrant-client" },
     { name = "sentence-transformers" },
@@ -900,30 +901,43 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
-data = [
+api = [
+    { name = "fastapi", extra = ["standard"] },
+    { name = "ollama" },
+    { name = "pydantic" },
+]
+data-ingest = [
     { name = "arxiv" },
 ]
-fastapi = [
+dev = [
+    { name = "arxiv" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "ollama" },
     { name = "pydantic" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "arxiv", marker = "extra == 'data'", specifier = ">=2.2.0" },
-    { name = "fastapi", extras = ["standard"], marker = "extra == 'fastapi'", specifier = ">=0.115.12" },
+    { name = "arxiv", marker = "extra == 'data-ingest'", specifier = ">=2.2.0" },
+    { name = "arxiv", marker = "extra == 'dev'", specifier = ">=2.2.0" },
+    { name = "fastapi", extras = ["standard"], marker = "extra == 'api'", specifier = ">=0.115.12" },
+    { name = "fastapi", extras = ["standard"], marker = "extra == 'dev'", specifier = ">=0.115.12" },
     { name = "hf-xet", specifier = ">=1.0.5" },
     { name = "llama-index", specifier = ">=0.12.33" },
     { name = "llama-index-embeddings-huggingface", specifier = ">=0.5.3" },
     { name = "llama-index-llms-ollama", specifier = ">=0.5.4" },
     { name = "llama-index-vector-stores-qdrant", specifier = ">=0.6.0" },
-    { name = "pydantic", marker = "extra == 'fastapi'", specifier = ">=2.11.3" },
+    { name = "ollama", marker = "extra == 'api'", specifier = ">=0.4.8" },
+    { name = "ollama", marker = "extra == 'dev'", specifier = ">=0.4.8" },
+    { name = "pydantic", marker = "extra == 'api'", specifier = ">=2.11.3" },
+    { name = "pydantic", marker = "extra == 'dev'", specifier = ">=2.11.3" },
+    { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "qdrant-client", specifier = ">=1.14.2" },
     { name = "sentence-transformers", specifier = ">=4.1.0" },
     { name = "structlog", specifier = ">=25.3.0" },
 ]
-provides-extras = ["data", "fastapi"]
+provides-extras = ["data-ingest", "api", "dev"]
 
 [[package]]
 name = "markdown-it-py"

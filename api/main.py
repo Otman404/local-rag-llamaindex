@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 from typing import Optional
 from pydantic import BaseModel, Field
-import yaml
 from llama_index.llms.ollama import Ollama
-from rag.rag import RAG
+from rag import RAG
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
-config_file = "config.yml"
-
-with open(config_file, "r") as conf:
-    config = yaml.safe_load(conf)
+llm_url = os.getenv("LLM_URL")
+llm_name = os.getenv("LLM_NAME")
 
 
 class Query(BaseModel):
@@ -22,8 +23,8 @@ class Response(BaseModel):
     source: str
 
 
-llm = Ollama(model=config["llm_name"], url=config["llm_url"])
-rag = RAG(config_file=config, llm=llm)
+llm = Ollama(model=llm_name, base_url=llm_url)
+rag = RAG(llm=llm)
 index = rag.qdrant_index()
 
 

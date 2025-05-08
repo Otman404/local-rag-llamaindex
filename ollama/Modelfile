@@ -1,4 +1,4 @@
-FROM /opt/zephyr-models/zephyr-7b-beta.Q5_K_M.gguf
+FROM ./zephyr-7b-beta.Q5_K_M.gguf
 PARAMETER num_ctx 3900
 PARAMETER temperature 0.7
 PARAMETER top_k 50

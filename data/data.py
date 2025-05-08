@@ -10,21 +10,31 @@ from llama_index.core import (
 import qdrant_client
 import argparse
 import arxiv
-import yaml
 import os
 import structlog
+from dotenv import load_dotenv
 
 logger = structlog.get_logger()
 
+load_dotenv()
+
+data_path = os.getenv("DATA_PATH")
+qdrant_url = os.getenv("QDRANT_URL")
+collection_name = os.getenv("COLLECTION_NAME")
+embedding_model = os.getenv("EMBEDDING_MODEL")
+llm_url = os.getenv("LLM_URL")
+llm_name = os.getenv("LLM_NAME")
+chunk_size = int(os.getenv("CHUNK_SIZE"))
+
 
 class Data:
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
+        pass
 
     def _create_data_folder(self, download_path):
         data_path = download_path
         if not os.path.exists(data_path):
-            os.makedirs(self.config["data_path"])
+            os.makedirs(data_path)
             logger.info("Output folder created", output_folder=data_path)
         else:
             logger.warning(f"Output folder already exists at {data_path}")
@@ -50,28 +60,28 @@ class Data:
 
     def ingest(self, embedder, llm):
         logger.info("Indexing data...")
-        documents = SimpleDirectoryReader(self.config["data_path"]).load_data()
+        documents = SimpleDirectoryReader(data_path).load_data()
 
-        client = qdrant_client.QdrantClient(url=self.config["qdrant_url"])
+        client = qdrant_client.QdrantClient(url=qdrant_url)
         qdrant_vector_store = QdrantVectorStore(
-            client=client, collection_name=self.config["collection_name"]
+            client=client, collection_name=collection_name
         )
         storage_context = StorageContext.from_defaults(vector_store=qdrant_vector_store)
 
         Settings.llm = None
         Settings.embed_model = embedder
-        Settings.chunk_size = self.config["chunk_size"]
+        Settings.chunk_size = chunk_size
         index = VectorStoreIndex.from_documents(
             documents, storage_context=storage_context, Settings=Settings
         )
         logger.info(
             "Data indexed successfully to Qdrant",
-            collection=self.config["collection_name"],
+            collection=collection_name,
         )
         return index
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-q",
@@ -97,18 +107,21 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    config_file = "config.yml"
-    with open(config_file, "r") as conf:
-        config = yaml.safe_load(conf)
-    data = Data(config)
+    data = Data()
     if args.query:
         data.download_papers(
             search_query=args.query,
-            download_path=config["data_path"],
+            download_path=data_path,
             max_results=args.max,
         )
     if args.ingest:
-        logger.info("Loading Embedder...", embed_model=config["embedding_model"])
-        embed_model = HuggingFaceEmbedding(model_name=config["embedding_model"])
-        llm = Ollama(model=config["llm_name"], base_url=config["llm_url"])
+        logger.info("Loading Embedder...", embed_model=embedding_model)
+        embed_model = HuggingFaceEmbedding(
+            model_name=embedding_model, cache_folder="./cache"
+        )
+        llm = Ollama(model=llm_name, base_url=llm_url)
         data.ingest(embedder=embed_model, llm=llm)
+
+
+if __name__ == "__main__":
+    main()
