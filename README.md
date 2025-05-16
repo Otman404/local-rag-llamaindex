@@ -20,7 +20,8 @@ For more details, please checkout the [blog post](https://otmaneboughaba.com/pos
 
 ### Quick Start (Docker Compose)
 
-This project now uses Docker and Docker Compose for easier setup and reproducibility.
+This project now uses Docker and Docker Compose for easier setup and reproducibility: 
+_You can visit this blog article to learn more: [Dockerizing a RAG Application with FastAPI, LlamaIndex, Qdrant and Ollama](https://otmaneboughaba.com/posts/dockerize-rag-application/)_
 
 #### 1. Clone the Repo
 
