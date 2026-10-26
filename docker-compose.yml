@@ -13,12 +13,13 @@ services:
     build:
       context: .
       dockerfile: api/Dockerfile
+      additional_contexts:
+        rag-base-image: service:base
     ports:
       - "8000:80"
     depends_on:
       - ollama
       - qdrant
-      - base
     environment:
       - LLM_URL=http://ollama:11434
       - LLM_NAME=research_assistant
@@ -37,11 +38,12 @@ services:
     build:
       context: .
       dockerfile: data/Dockerfile
+      additional_contexts:
+        rag-base-image: service:base
     profiles: ["data-ingest"]
     depends_on:
       - ollama
       - qdrant
-    entrypoint: ["python", "data.py"]
     environment:
       - DATA_PATH=papers/
       - LLM_URL=http://ollama:11434
@@ -80,13 +82,15 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
 
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    # Uncomment to run Ollama on an NVIDIA GPU (requires the NVIDIA Container Toolkit).
+    # Leave commented on machines without one (e.g. Macs): Ollama then runs on CPU.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
     ports:
       - "11434:11434"
     networks:

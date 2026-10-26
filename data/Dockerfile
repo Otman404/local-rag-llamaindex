@@ -2,10 +2,8 @@ FROM rag-base-image
 
 WORKDIR /app
 
-COPY pyproject.toml uv.lock ./
-
-RUN uv pip install --system ".[data_ingest]"
+RUN uv sync --frozen --no-install-project --extra data_ingest
 
 COPY data/ .
 
-ENTRYPOINT ["uv", "run", "data.py"]
+ENTRYPOINT ["python", "data.py"]

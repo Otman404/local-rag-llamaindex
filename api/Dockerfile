@@ -1,10 +1,10 @@
 FROM rag-base-image
 
+WORKDIR /app
+
+RUN uv sync --frozen --no-install-project --extra api
+
 WORKDIR /api
-
-COPY pyproject.toml uv.lock ./
-
-RUN uv pip install --system ".[api]"
 
 COPY api/ .
 

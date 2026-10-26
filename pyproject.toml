@@ -15,8 +15,6 @@ dependencies = [
     "qdrant-client>=1.14.2",
     "sentence-transformers>=4.1.0",
     "structlog>=25.3.0",
-    
-
 ]
 
 [project.optional-dependencies]

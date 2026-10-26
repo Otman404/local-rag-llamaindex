@@ -30,38 +30,46 @@ git clone https://github.com/Otman404/local-rag-llamaindex
 cd local-rag-llamaindex
 ```
 
-#### 2. Build the Docker images
+#### 2. Download the LLM
+
+The Ollama container builds the model from `ollama/Modelfile`, which expects the [Zephyr 7B Beta](https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF) GGUF file (~5 GB) inside the `ollama/` folder:
 
 ```bash
-docker compose build
+curl -L -o ollama/zephyr-7b-beta.Q5_K_M.gguf \
+  https://huggingface.co/TheBloke/zephyr-7B-beta-GGUF/resolve/main/zephyr-7b-beta.Q5_K_M.gguf
+```
+
+#### 3. Build the Docker images
+
+```bash
+docker compose --profile data-ingest build
 ```
 
 This will:
 
-* Build a rag-base-image containing shared dependencies (LlamaIndex, llama-index, etc.)
+* Build a rag-base-image containing the shared dependencies (LlamaIndex, Qdrant client, sentence-transformers, etc.)
 
 * Build the api service (FastAPI backend) using Dockerfile in api/
 
-* Build the data_ingestion service used for downloading and indexing research papers using Dockerfile in data/
+* Build the data_ingestion service used for downloading and indexing research papers using Dockerfile in data/ (it sits behind the `data-ingest` profile, hence the `--profile` flag)
 
-#### 3. Run All Services
+#### 4. Start Qdrant and Ollama
 
 ```bash
-docker compose up ollama qdrant api
+docker compose up -d qdrant ollama
 ```
 
 This starts:
 
-* **API** server (FastAPI on port `8000`)
 * **Qdrant** vector DB (port `6333`)
 * **Ollama** LLM server (port `11434`)
 
-#### 4. Download & Ingest Papers
+#### 5. Download & Ingest Papers
 
 To ingest new research papers into Qdrant:
 
 ```bash
-docker compose run data_ingestion --query "LLM" --max 5 --ingest
+docker compose run --rm data_ingestion --query "LLM" --max 5 --ingest
 ```
 
 `--query`: search keyword for downloading research papers from Arxiv.
@@ -72,7 +80,36 @@ docker compose run data_ingestion --query "LLM" --max 5 --ingest
 
 This uses `arxiv` to fetch papers, chunk them with LlamaIndex, and store them into Qdrant.
 
-> ✅ You should now be able to query the API at `http://localhost:8000`
+#### 6. Start the API
+
+```bash
+docker compose up api
+```
+
+The API server runs on port `8000`.
+
+> **Note:** ingest at least once before starting the API. The API detects the Qdrant collection's format when it starts, so if it starts before the collection exists, queries fail with `Not existing vector name error: text-dense`. If that happens, run `docker compose restart api`. Ingesting more papers later doesn't need a restart.
+
+#### 7. Query the API
+
+```bash
+curl -X POST http://localhost:8000/api/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What are the main findings?", "similarity_top_k": 2}'
+```
+
+Or use the interactive docs at `http://localhost:8000/docs`.
+
+The response contains the generated answer and the list of papers it was based on:
+
+```json
+{
+  "search_result": "...",
+  "sources": ["/app/papers/Paper_A.pdf", "/app/papers/Paper_B.pdf"]
+}
+```
+
+> Running on CPU (e.g. Docker on a Mac), a query can take a minute or more.
 
 #### Stopping & Clean Up
 
