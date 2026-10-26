@@ -20,7 +20,7 @@ class RAG:
         qdrant_vector_store = QdrantVectorStore(
             client=client, collection_name=self.config["collection_name"]
         )
-        Settings.llm = None
+        Settings.llm = self.llm
         Settings.embed_model = self.load_embedder()
         Settings.chunk_size = self.config["chunk_size"]
 

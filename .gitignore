@@ -3,3 +3,4 @@ data
 qdrant_storage
 models/
 ollama/
+papers/
